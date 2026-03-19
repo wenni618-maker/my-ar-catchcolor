@@ -81,7 +81,7 @@
             { 
                 c: '#f77f00', // 橘色
                 questions: [
-                    '這抹顏色像不像夕陽最後的餘暉？它讓你感到一種放下的輕鬆，還是一種消逝的落寞？',
+                    '這抹顏色像不像夕陽最後的餘暉？它讓你感到一種放下的輕鬆，還是一種消逝的落幕？',
                     '如果橘色是一種聲音，它聽起來會是甚麼樣的世界呢？',
                     '如果橘色是一種氣味，它聞起來是清新的，還是讓你感到有些悶熱？用一句話來形容吧!',
                     '你覺得這抹橘色現在最想對你表達什麼？'
@@ -174,25 +174,30 @@
 
         function handleChat() {
             const text = userInput.value.trim();
+            
+            // --- 隨機多樣化回應庫 ---
+            const responses = [
+                "聽見了。你的這份覺察已經融入色彩，成為空間的一部分。",
+                "這份感受已經被記錄在色塊的流動中，安靜地存在著。",
+                "感謝你的傾訴。這份文字的重量，現在正由色彩為你承擔。",
+                "看見了。這些碎片化的思緒，已經在這裡找到了安放的位置。",
+                "你的話語像是一陣風，讓這個空間的色彩有了新的律動。",
+                "聽見了。你的直覺非常獨特，它豐富了這片色彩的生命力。"
+            ];
+
             if (text === "") {
                 qText.innerText = "沒關係，沈默有時也是一種最有力的傾訴。";
             } else {
-                if (text.includes("累") || text.includes("壓力") || text.includes("煩") || text.includes("重")) {
-                    qText.innerText = "感受到那股重量了。這份色彩會承接住你的疲憊，讓它隨墨跡散去吧。";
-                } else if (text.includes("怕") || text.includes("不安") || text.includes("緊張") || text.includes("痛")) {
-                    qText.innerText = "這裡很安全。你的脆弱在這些色彩中是勇敢的證明，我會為你守護它。";
-                } else if (text.includes("好") || text.includes("順") || text.includes("亮") || text.includes("愛")) {
-                    qText.innerText = "讓這份純粹的光亮留在你心底，它會是你度過陰霾時最堅定的力量。";
-                } else {
-                    qText.innerText = "聽見了。你的覺察已經化作這抹色彩的印記，在這裡安全地存在著。";
-                }
+                // 隨機挑選一個回應
+                const randomIndex = Math.floor(Math.random() * responses.length);
+                qText.innerText = responses[randomIndex];
             }
 
+            // --- 隱藏輸入區並執行色塊升起消失動畫 ---
             inputArea.style.display = 'none';
 
             if (currentSoul) {
                 const pos = currentSoul.getAttribute('position');
-                // 維持升起淡出的視覺回饋，象徵情緒被記錄與釋放
                 currentSoul.setAttribute('animation__fadeout', {
                     property: 'position', to: `${pos.x} ${pos.y + 3} ${pos.z}`, dur: 3500, easing: 'easeInQuad'
                 });
@@ -203,7 +208,8 @@
                 setTimeout(() => { if(currentSoul.parentNode) currentSoul.parentNode.removeChild(currentSoul); }, 3500);
             }
 
-            setTimeout(() => { dialog.style.display = 'none'; }, 4000);
+            // 4秒後自動關閉對話框
+            setTimeout(() => { document.getElementById('dialog-box').style.display = 'none'; }, 4000);
         }
     </script>
 </body>
