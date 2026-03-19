@@ -53,7 +53,7 @@
         </div>
     </div>
 
-    <a-scene cursor="rayOrigin: mouse" raycaster="objects: .color-soul" renderer="sortObjects: true; alpha: true;">
+    <a-scene cursor="rayOrigin: mouse" raycaster="objects: .color-soul" renderer="sortObjects: true; alpha: true;" vr-mode-ui="enabled: false">
         <a-assets>
             <img id="paper-bg" src="IMG_3120.jpg">
             <img id="splash-texture" src="IMG_3095.png">
@@ -81,7 +81,7 @@
             { 
                 c: '#f77f00', // 橘色
                 questions: [
-                    '這抹顏色像不像夕陽最後的餘暉？它讓你感到一種放下的輕鬆，還是一種消逝的落幕？',
+                    '這抹顏色像不像夕陽最後的餘暉？它讓你感到一種放下的輕鬆，還是一種消逝的落寞？',
                     '如果橘色是一種聲音，它聽起來會是甚麼樣的世界呢？',
                     '如果橘色是一種氣味，它聞起來是清新的，還是讓你感到有些悶熱？用一句話來形容吧!',
                     '你覺得這抹橘色現在最想對你表達什麼？'
@@ -104,7 +104,7 @@
                     '這抹綠色若是一個天氣，你現在正處於什麼樣的環境中？',
                     '觀察這抹綠，描述它與你之間的距離感。',
                     '如果這抹綠色是一個天氣，描述你現在身處的環境。'
-                ] // 已修復原檔缺失的括號
+                ]
             },
             { 
                 c: '#003049', // 藍色
@@ -203,7 +203,7 @@
                 setTimeout(() => { if(currentSoul.parentNode) currentSoul.parentNode.removeChild(currentSoul); }, 3500);
             }
 
-            setTimeout(() => { document.getElementById('dialog-box').style.display = 'none'; }, 4000);
+            setTimeout(() => { dialog.style.display = 'none'; }, 4000);
         }
     </script>
 </body>
