@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>靈魂色塊：暖心墨染空間</title>
+    <title>靈魂色塊：輕盈墨染空間</title>
     <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
     <script src="https://unpkg.com/aframe-look-at-component@0.8.0/dist/aframe-look-at-component.min.js"></script>
     <style>
@@ -17,15 +17,12 @@
             width: 85%; max-width: 450px; background: rgba(255, 255, 255, 0.95); 
             padding: 25px; border-radius: 25px; text-align: center; display: none; 
             pointer-events: auto; box-shadow: 0 15px 35px rgba(0,0,0,0.15); 
-            transition: all 0.3s ease;
         }
         .btn { 
             background: #4a4a4a; color: #fff; border: none; padding: 12px 35px; 
             border-radius: 30px; cursor: pointer; margin-top: 15px; font-weight: bold;
-            font-size: 16px; transition: 0.3s;
+            font-size: 16px;
         }
-        .btn:hover { background: #000; letter-spacing: 1px; }
-        #question-text { line-height: 1.6; color: #333; font-size: 18px; margin-bottom: 10px; }
         #hint-text {
             position: absolute; top: 30px; width: 100%; text-align: center;
             color: rgba(0,0,0,0.4); letter-spacing: 3px; font-size: 14px;
@@ -35,7 +32,7 @@
 <body>
 
     <div id="interface">
-        <div id="hint-text">凝聚的思緒在此漂浮，輕觸它們...</div>
+        <div id="hint-text">思緒已隨風散開，轉動視角尋找它們...</div>
         <div id="dialog-box">
             <p id="question-text"></p>
             <button class="btn" id="action-btn" onclick="handleAction()">對它傾訴...</button>
@@ -63,7 +60,6 @@
             { c: '#003049', q: '深邃的藍色。有些話如果不說出來，是否會像深海一樣沉重？' }
         ];
 
-        // 情緒價值語句庫
         const emotionalResponses = [
             "謝謝你的信任，你的感受在這裡是被允許且安全的。",
             "我聽見了。這份情緒辛苦你了，現在把它留給這個空間吧。",
@@ -74,7 +70,7 @@
 
         const container = document.getElementById('soul-container');
         const sceneEl = document.querySelector('a-scene');
-        let currentSoul = null; // 記錄當前點擊的色塊
+        let currentSoul = null;
 
         if (sceneEl.hasLoaded) { spawnSouls(); } 
         else { sceneEl.addEventListener('loaded', spawnSouls); }
@@ -85,19 +81,21 @@
                 const data = colorsData[i % colorsData.length];
                 const soul = document.createElement('a-image');
                 
-                const radius = 3 + Math.random() * 1.5; 
-                const angle = (Math.random() - 0.5) * (Math.PI * 2 / 3); 
+                // --- 調整為更鬆散的分布 ---
+                const radius = 2.5 + Math.random() * 4.5; // 範圍擴大到 2.5m ~ 7m
+                const angle = Math.random() * Math.PI * 2; // 恢復 360 度環繞
                 const x = Math.sin(angle) * radius;
                 const z = -Math.cos(angle) * radius;
-                const y = 1.2 + Math.random() * 1.2; 
+                const y = 0.5 + Math.random() * 3.5; // 高度落差加大
 
                 soul.setAttribute('position', {x, y, z});
                 soul.setAttribute('src', '#splash-texture');
                 soul.setAttribute('class', 'color-soul');
+                
                 soul.setAttribute('material', {
                     color: data.c,
                     transparent: true,
-                    opacity: 0.75,
+                    opacity: 0.7, // 稍微調透明一點，增加空氣感
                     shader: 'flat',
                     depthWrite: false,
                     side: 'double'
@@ -110,8 +108,8 @@
 
                 soul.setAttribute('animation', {
                     property: 'position',
-                    to: `${x} ${y + 0.2} ${z}`,
-                    dur: 3000 + Math.random() * 3000,
+                    to: `${x} ${y + (Math.random() * 0.6 - 0.3)} ${z}`, // 隨機浮動幅度
+                    dur: 4000 + Math.random() * 4000,
                     dir: 'alternate',
                     loop: true,
                     easing: 'easeInOutSine'
@@ -122,16 +120,10 @@
                     const dialog = document.getElementById('dialog-box');
                     const qText = document.getElementById('question-text');
                     const btn = document.getElementById('action-btn');
-                    
                     btn.style.display = 'inline-block';
                     dialog.style.display = 'block';
                     qText.innerText = data.q;
-
-                    soul.setAttribute('animation__click', {
-                        property: 'scale',
-                        to: `${s * 1.4} ${s * 1.4} ${s * 1.4}`,
-                        dur: 300
-                    });
+                    soul.setAttribute('animation__click', { property: 'scale', to: `${s * 1.4} ${s * 1.4} ${s * 1.4}`, dur: 300 });
                 });
 
                 container.appendChild(soul);
@@ -141,13 +133,10 @@
         function handleAction() {
             const qText = document.getElementById('question-text');
             const btn = document.getElementById('action-btn');
-            
-            // 隱藏按鈕，顯示隨機回饋語
             btn.style.display = 'none';
             const randomMsg = emotionalResponses[Math.floor(Math.random() * emotionalResponses.length)];
             qText.innerText = randomMsg;
 
-            // 視覺回饋：當前色塊慢慢升起並消失
             if (currentSoul) {
                 const currentPos = currentSoul.getAttribute('position');
                 currentSoul.setAttribute('animation__fadeout', {
@@ -162,15 +151,11 @@
                     dur: 2000,
                     easing: 'linear'
                 });
-                // 移除 class 防止重複點擊，並在動畫後移除物件
                 currentSoul.classList.remove('color-soul');
                 setTimeout(() => { if(currentSoul.parentNode) currentSoul.parentNode.removeChild(currentSoul); }, 2500);
             }
 
-            // 2.5秒後關閉對話框
-            setTimeout(() => {
-                document.getElementById('dialog-box').style.display = 'none';
-            }, 3000);
+            setTimeout(() => { document.getElementById('dialog-box').style.display = 'none'; }, 3000);
         }
     </script>
 </body>
