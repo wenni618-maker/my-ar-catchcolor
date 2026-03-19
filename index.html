@@ -3,138 +3,137 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>靈魂色塊：墨染空間</title>
+    <title>靈魂色塊：噴濺墨染空間</title>
     <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
     <style>
-        body { margin: 0; overflow: hidden; background-color: #f7f1e1; }
-        #interface {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            pointer-events: none; z-index: 10;
-            font-family: 'PingFang TC', serif;
+        /* 設定兜底背景色，確保載入時不漆黑 */
+        body { margin: 0; overflow: hidden; background-color: #d9d1b3; } 
+        
+        #interface { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 10; font-family: sans-serif; }
+        
+        #dialog-box { 
+            position: absolute; bottom: 50px; left: 50%; transform: translateX(-50%); 
+            width: 80%; max-width: 450px; background: rgba(255, 255, 255, 0.9); 
+            padding: 25px; border-radius: 20px; text-align: center; display: none; 
+            pointer-events: auto; box-shadow: 0 10px 25px rgba(0,0,0,0.1); 
         }
-        #dialog-box {
-            position: absolute; bottom: 50px; left: 50%;
-            transform: translateX(-50%); width: 85%; max-width: 500px;
-            background: rgba(255, 255, 255, 0.95);
-            padding: 30px; border-radius: 20px;
-            text-align: center; display: none; pointer-events: auto;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        
+        .btn { 
+            background: #333; color: #fff; border: none; padding: 10px 25px; 
+            border-radius: 20px; cursor: pointer; margin-top: 10px; font-weight: bold;
         }
-        .btn {
-            background: #4a4a4a; color: #fff; border: none;
-            padding: 12px 30px; border-radius: 30px; cursor: pointer;
-        }
-
-        /* 關鍵：SVG 濾鏡，將圓形變成有機噴濺狀 */
-        .ink-filter {
-            filter: url(#organic-ink);
-        }
+        .btn:hover { background: #000; }
     </style>
 </head>
 <body>
 
-    <svg style="position: absolute; width: 0; height: 0;">
-        <filter id="organic-ink">
-            <feTurbulence type="fractalNoise" baseFrequency="0.05" numOctaves="3" result="noise" />
-            <feDisplacementMap in="SourceGraphic" in2="noise" scale="40" />
-        </filter>
-    </svg>
-
     <div id="interface">
         <div id="dialog-box">
             <p id="question-text"></p>
-            <button class="btn" onclick="handleAction()">對它傾訴...</button>
+            <button class="btn" id="action-btn" onclick="handleAction()">對它傾訴...</button>
         </div>
     </div>
 
-    <a-scene embedded cursor="rayOrigin: mouse" raycaster="objects: .color-soul">
+    <a-scene id="main-scene" cursor="rayOrigin: mouse" raycaster="objects: .color-soul" renderer="alpha: true; antialias: true;">
+        
         <a-assets>
-            <img id="my-bg" src="IMG_3120.jpg">
+            <img id="paper-bg" src="IMG_3120.jpg">
+            <img id="splash-texture" src="IMG_3095.png">
         </a-assets>
 
-        <a-sky src="#my-bg" rotation="0 -90 0"></a-sky>
+        <a-sky src="#paper-bg" rotation="0 -90 0"></a-sky>
         
-        <a-entity light="type: ambient; intensity: 1.5"></a-entity>
-
+        <a-entity light="type: ambient; intensity: 1.0"></a-entity>
+        
         <a-entity camera look-controls position="0 1.6 0"></a-entity>
+
+        <a-entity id="soul-container"></a-entity>
     </a-scene>
 
     <script>
-        const colorsData = [
-            { c: '#E63946', q: '灼熱的硃砂紅。它是心頭的熱血，還是警示的憤怒？' },
-            { c: '#0A0A0A', q: '沉靜的墨黑。它是萬物的起點，還是終極的虛無？' },
-            { c: '#A8DADC', q: '清冽的石青。它是早春的溪水，還是自由的呼吸？' },
-            { c: '#fcbf49', q: '閃耀的藤黃。它是希望的晨曦，還是昨日的輝煌？' },
-            { c: '#7b2cbf', q: '神祕的石蓮紫。它是醒不來的夢，你想留在夢裡嗎？' }
+        const colors = [
+            { c: '#d62828', q: '你抓住了這抹紅，它讓你聯想到溫暖的夕陽，還是灼熱的憤怒？' },
+            { c: '#f77f00', q: '這抹橘色正散發微光。在自由的世界裡，它對你而言是什麼？' },
+            { c: '#fcbf49', q: '明亮的黃色。它代表的是希望的晨曦，還是逝去的純真？' },
+            { c: '#6a994e', q: '新生的綠。它是成長的喜悅，還是平靜的依靠？' },
+            { c: '#003049', q: '深邃的藍。你是否感到一絲迷茫，或是深邃的安穩？' }
         ];
 
-        const scene = document.querySelector('a-scene');
-        const dialog = document.getElementById('dialog-box');
-        const qText = document.getElementById('question-text');
+        const sceneEl = document.querySelector('a-scene');
+        const container = document.getElementById('soul-container');
+
+        // 確保場景載入完成後再生成
+        if (sceneEl.hasLoaded) {
+            spawnSouls();
+        } else {
+            sceneEl.addEventListener('loaded', spawnSouls);
+        }
 
         function spawnSouls() {
-            // 先清空可能存在的錯誤殘留
-            console.log("正在生成有機墨染色塊...");
-            
-            for (let i = 0; i < 30; i++) {
-                const data = colorsData[i % colorsData.length];
+            for (let i = 0; i < 25; i++) {
+                const data = colors[i % colors.length];
                 
-                // 使用最基礎的 circle，絕對能顯示
-                const soul = document.createElement('a-circle');
+                // 改用 a-image 來承載噴濺形狀貼圖
+                const soul = document.createElement('a-image');
                 
-                const radius = Math.random() * 5 + 3;
-                const theta = Math.random() * Math.PI * 2;
-                const x = radius * Math.sin(theta);
-                const y = Math.random() * 3 + 0.5;
-                const z = radius * Math.cos(theta);
+                // 隨機分佈在相機四周
+                const radius = 4;
+                const angle = Math.random() * Math.PI * 2;
+                const x = Math.cos(angle) * radius;
+                const y = Math.random() * 2 + 0.5;
+                const z = Math.sin(angle) * radius;
 
                 soul.setAttribute('position', {x, y, z});
-                soul.setAttribute('radius', Math.random() * 0.4 + 0.3);
+                soul.setAttribute('src', '#splash-texture'); // 套用噴濺圖片
                 soul.setAttribute('class', 'color-soul');
                 
-                // 這裡運用一點技巧：讓圓形始終面向玩家
+                // 讓色塊永遠面向玩家，並設定顏色與透明度
                 soul.setAttribute('material', {
                     color: data.c,
                     transparent: true,
-                    opacity: 0.7,
-                    shader: 'flat',
-                    side: 'double'
+                    opacity: 0.8,
+                    shader: 'flat' // 使用 flat 確保顏色不受 3D 陰影影響而變髒
                 });
 
-                // 讓色塊面向中心（相機）
-                soul.setAttribute('look-at', '[camera]');
+                // 隨機大小與旋轉，讓形狀看起來更多樣
+                const s = Math.random() * 0.5 + 0.5;
+                soul.setAttribute('scale', {x: s, y: s, z: s});
+                soul.setAttribute('rotation', `0 0 ${Math.random() * 360}`);
 
-                // 增加動畫
+                // 輕微的浮動感
                 soul.setAttribute('animation', {
                     property: 'position',
-                    to: `${x} ${y + 0.5} ${z}`,
-                    dur: 5000 + Math.random() * 4000,
+                    to: `${x} ${y + 0.3} ${z}`,
+                    dur: 3000 + Math.random() * 2000,
                     dir: 'alternate',
                     loop: true,
                     easing: 'easeInOutSine'
                 });
 
+                // 點擊事件
                 soul.addEventListener('mousedown', () => {
+                    const dialog = document.getElementById('dialog-box');
+                    const qText = document.getElementById('question-text');
                     dialog.style.display = 'block';
                     qText.innerText = data.q;
-                    soul.setAttribute('animation__click', 'property: scale; to: 2 2 2; dur: 300');
+                    // 點擊反饋：放大
+                    soul.setAttribute('animation__click', {
+                        property: 'scale',
+                        to: `${s * 1.5} ${s * 1.5} ${s * 1.5}`,
+                        dur: 300
+                    });
                 });
 
-                scene.appendChild(soul);
+                container.appendChild(soul);
             }
         }
 
-        if (scene.hasLoaded) {
-            spawnSouls();
-        } else {
-            scene.addEventListener('loaded', spawnSouls);
-        }
-
         function handleAction() {
-            qText.innerText = "聆聽中...您的感受已被溫柔接住。";
-            setTimeout(() => { dialog.style.display = 'none'; }, 2000);
+            document.getElementById('question-text').innerText = "感受已收錄，謝謝你的分享。";
+            setTimeout(() => {
+                document.getElementById('dialog-box').style.display = 'none';
+            }, 2000);
         }
     </script>
-    <script src="https://unpkg.com/aframe-look-at-component@0.8.0/dist/aframe-look-at-component.min.js"></script>
 </body>
 </html>
