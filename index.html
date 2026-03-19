@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>靈魂色塊：墨染對話空間</title>
+    <title>靈魂色塊：深層對話空間</title>
     <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
     <script src="https://unpkg.com/aframe-look-at-component@0.8.0/dist/aframe-look-at-component.min.js"></script>
     <style>
@@ -23,16 +23,16 @@
         #input-area { display: none; margin-top: 15px; }
         
         #user-input {
-            width: 80%; padding: 10px; border-radius: 20px; border: 1px solid #ccc;
-            outline: none; font-size: 16px; margin-bottom: 10px;
+            width: 85%; padding: 12px; border-radius: 20px; border: 1px solid #ccc;
+            outline: none; font-size: 16px; margin-bottom: 10px; background: #fdfdfd;
         }
 
         .btn { 
-            background: #4a4a4a; color: #fff; border: none; padding: 10px 25px; 
+            background: #4a4a4a; color: #fff; border: none; padding: 10px 30px; 
             border-radius: 30px; cursor: pointer; font-weight: bold; font-size: 14px;
         }
         
-        #question-text { line-height: 1.6; color: #333; font-size: 18px; margin-bottom: 10px; }
+        #question-text { line-height: 1.7; color: #333; font-size: 18px; margin-bottom: 10px; font-weight: 500; }
         #hint-text {
             position: absolute; top: 30px; width: 100%; text-align: center;
             color: rgba(0,0,0,0.4); letter-spacing: 3px; font-size: 14px;
@@ -42,11 +42,11 @@
 <body>
 
     <div id="interface">
-        <div id="hint-text">點擊色塊，將你的情緒寫在墨色裡...</div>
+        <div id="hint-text">讓色彩成為你的鏡子，看見那些未曾言說的...</div>
         <div id="dialog-box">
             <p id="question-text"></p>
             <div id="input-area">
-                <input type="text" id="user-input" placeholder="在這裡寫下你的心情..." autocomplete="off">
+                <input type="text" id="user-input" placeholder="試著描述那種感覺..." autocomplete="off">
                 <br>
                 <button class="btn" onclick="handleChat()">傾訴完畢</button>
             </div>
@@ -65,12 +65,48 @@
     </a-scene>
 
     <script>
+        // --- 深度引導題庫 ---
         const colorsData = [
-            { c: '#d62828', q: '這抹紅如此強烈，此刻你心中有什麼想宣洩的能量嗎？' },
-            { c: '#f77f00', q: '橘色的微光閃動著。有哪些事正讓你感到溫暖或不安？' },
-            { c: '#fcbf49', q: '明亮的黃色。如果要把一個願望放進這裡，那會是什麼？' },
-            { c: '#6a994e', q: '安靜的綠色。關於平靜，你現在最想對自己說什麼？' },
-            { c: '#003049', q: '深邃的藍色。有些話如果不說出來會很沉重，想聊聊嗎？' }
+            { 
+                c: '#d62828', // 紅色
+                questions: [
+                    '這抹紅若是你身體的一部分，它現在正隱隱作痛，還是充滿跳動的生命力？',
+                    '想像這股紅色在你胸口擴散，它帶來的是一種壓迫感，還是一股想衝破什麼的渴望？',
+                    '如果這抹紅是一種溫度，它正溫暖著你，還是讓你感到有些焦灼不安？'
+                ]
+            },
+            { 
+                c: '#f77f00', // 橘色
+                questions: [
+                    '看著這抹橘，你是否想起某個渴望回去、卻再也回不去的溫馨時刻？',
+                    '這抹顏色像不像夕陽最後的餘暉？它讓你感到一種放下的輕鬆，還是一種消逝的落寞？',
+                    '如果橘色是一種聲音，它聽起來是熱鬧的喧嘩，還是獨自一人時的平靜回響？'
+                ]
+            },
+            { 
+                c: '#fcbf49', // 黃色
+                questions: [
+                    '這抹黃若是你內心的一個傷口，它正在癒合發癢，還是正散發著刺眼的光芒？',
+                    '在某些瞬間，我們需要戴上面具表現得陽光。看著它，你現在感到的是真實的燦爛，還是疲憊的偽裝？',
+                    '如果這抹黃是一扇窗，窗外是你嚮往的自由，還是你害怕踏入的未知領域？'
+                ]
+            },
+            { 
+                c: '#6a994e', // 綠色
+                questions: [
+                    '這抹綠色若是你心中的一片荒野，你覺得它正處於復甦的春天，還是凋零的深秋？',
+                    '觸碰這抹綠，你感覺自己是被森林溫柔地包裹，還是迷失在看不見出口的濃霧中？',
+                    '如果綠色代表「原諒」，看著它，你有什麼是一直放不下、卻想在這裡交給它的？'
+                ]
+            },
+            { 
+                c: '#003049', // 藍色
+                questions: [
+                    '這抹深藍若是你情緒的深海，你正悠游其中感到安穩，還是感覺快要被海水沒頂窒息？',
+                    '藍色有時候代表憂鬱。這份憂鬱對你而言，是沉重的枷鎖，還是可以靜靜共處的同伴？',
+                    '看著這抹藍，你的呼吸是變得更加深長穩定，還是感到一陣陣短促的緊繃？'
+                ]
+            }
         ];
 
         const container = document.getElementById('soul-container');
@@ -108,7 +144,7 @@
 
                 soul.setAttribute('animation', {
                     property: 'position',
-                    to: `${x} ${y + (Math.random() * 0.8 - 0.4)} ${z}`,
+                    to: `${x} ${y + (Math.random() * 1.0 - 0.5)} ${z}`,
                     dur: 4000 + Math.random() * 3000,
                     dir: 'alternate', loop: true, easing: 'easeInOutSine'
                 });
@@ -117,7 +153,8 @@
                     currentSoul = soul;
                     dialog.style.display = 'block';
                     inputArea.style.display = 'block';
-                    qText.innerText = data.q;
+                    const randomQ = data.questions[Math.floor(Math.random() * data.questions.length)];
+                    qText.innerText = randomQ;
                     userInput.value = ""; 
                     userInput.focus();
                 });
@@ -129,32 +166,31 @@
         function handleChat() {
             const text = userInput.value.trim();
             if (text === "") {
-                qText.innerText = "沒關係的，即便只是留白，我也在這裡聽著。";
+                qText.innerText = "沒關係，沈默有時也是一種最有力的傾訴。";
             } else {
-                // 簡單的關鍵字回饋邏輯
-                if (text.includes("累") || text.includes("壓力") || text.includes("煩")) {
-                    qText.innerText = "聽起來你承載了很多。這抹顏色會幫你分擔一點重量，放心地交給它吧。";
-                } else if (text.includes("開心") || text.includes("好") || text.includes("棒")) {
-                    qText.innerText = "真為你感到高興！讓這份喜悅像墨水一樣，在空間裡暈染開來。";
-                } else if (text.includes("難過") || text.includes("哭") || text.includes("傷心")) {
-                    qText.innerText = "想哭也沒關係的，這裡很安靜，它會溫柔地包裹你的眼淚。";
+                if (text.includes("累") || text.includes("壓力") || text.includes("煩") || text.includes("重")) {
+                    qText.innerText = "感受到那股重量了。這份色彩會承接住你的疲憊，讓它隨墨跡散去吧。";
+                } else if (text.includes("怕") || text.includes("不安") || text.includes("緊張") || text.includes("痛")) {
+                    qText.innerText = "這裡很安全。你的脆弱在這些色彩中是勇敢的證明，我會為你守護它。";
+                } else if (text.includes("好") || text.includes("順") || text.includes("亮") || text.includes("愛")) {
+                    qText.innerText = "讓這份純粹的光亮留在你心底，它會是你度過陰霾時最堅定的力量。";
                 } else {
-                    qText.innerText = "謝謝你願意分享。你的話語已經化作色彩，成為這片空間的一部分。";
+                    qText.innerText = "聽見了。你的覺察已融入這片空間，成為一段獨特且流動的記憶。";
                 }
             }
 
-            inputArea.style.display = 'none'; // 隱藏輸入區
+            inputArea.style.display = 'none';
 
             if (currentSoul) {
                 const pos = currentSoul.getAttribute('position');
                 currentSoul.setAttribute('animation__fadeout', {
-                    property: 'position', to: `${pos.x} ${pos.y + 3} ${pos.z}`, dur: 3000, easing: 'easeInQuad'
+                    property: 'position', to: `${pos.x} ${pos.y + 3.5} ${pos.z}`, dur: 3200, easing: 'easeInQuad'
                 });
                 currentSoul.setAttribute('animation__opacity', {
                     property: 'material.opacity', to: 0, dur: 2500, easing: 'linear'
                 });
                 currentSoul.classList.remove('color-soul');
-                setTimeout(() => { if(currentSoul.parentNode) currentSoul.parentNode.removeChild(currentSoul); }, 3000);
+                setTimeout(() => { if(currentSoul.parentNode) currentSoul.parentNode.removeChild(currentSoul); }, 3200);
             }
 
             setTimeout(() => { dialog.style.display = 'none'; }, 4500);
