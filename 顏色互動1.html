@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>靈魂色塊互動</title>
+    <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
+    <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
+    <style>
+        /* 浮現在螢幕最上層的 UI 對話框 */
+        #ui-overlay {
+            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+            width: 80%; background: rgba(255, 255, 255, 0.9);
+            padding: 20px; border-radius: 15px; display: none;
+            font-family: sans-serif; text-align: center; z-index: 1000;
+        }
+    </style>
+</head>
+
+<body style="margin: 0; overflow: hidden;">
+
+    <div id="ui-overlay">
+        <p id="question-text">你抓住了這抹色彩...</p>
+        <button onclick="provideResponse()">我感受到了...</button>
+    </div>
+
+    <a-scene embedded arjs="sourceType: webcam; debugUIEnabled: false;">
+        <a-entity camera look-controls cursor="rayOrigin: mouse"></a-entity>
+
+        <a-sphere id="color-red" position="-1 1.5 -3" radius="0.5" color="#FF4B2B" 
+                  animation="property: position; to: -1 1.8 -3; dir: alternate; dur: 2000; loop: true; easing: easeInOutSine"
+                  class="interactable">
+        </a-sphere>
+
+        <a-sphere id="color-orange" position="1 1 -3" radius="0.4" color="#FF9068"
+                  animation="property: position; to: 1 1.3 -3; dir: alternate; dur: 2500; loop: true; easing: easeInOutSine"
+                  class="interactable">
+        </a-sphere>
+    </a-scene>
+
+    <script>
+        const ui = document.getElementById('ui-overlay');
+        const questionText = document.getElementById('question-text');
+
+        // 監聽點擊事件
+        document.querySelectorAll('.interactable').forEach(sphere => {
+            sphere.addEventListener('click', function () {
+                const color = this.getAttribute('color');
+                
+                // 1. 視覺回饋：閃爍並放大
+                this.setAttribute('animation__click', "property: scale; to: 1.5 1.5 1.5; dur: 300");
+                
+                // 2. 顯示對話框
+                ui.style.display = 'block';
+                if(color === '#FF4B2B') {
+                    questionText.innerText = "你抓住了這抹紅，它讓你聯想到了灼熱的憤怒，還是生命力的跳動？";
+                } else {
+                    questionText.innerText = "這抹橘色正散發微光。試著對它說出一個屬於你的詞彙...";
+                }
+            });
+        });
+
+        // 模擬通用回覆
+        function provideResponse() {
+            questionText.innerText = "謝謝你的分享。在這片色彩裡，你的感受已經被溫柔地接住了。";
+            setTimeout(() => {
+                ui.style.display = 'none';
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
