@@ -65,47 +65,16 @@
     </a-scene>
 
     <script>
+        // --- 設定區 ---
+        let clickCount = 0;
+        const MAX_CLICKS = 3; // 設定回答 3 次後觸發劇情銜接
+        
         const colorsData = [
-            { 
-                c: '#d62828', // 紅色
-                questions: [
-                    '盯著這抹紅，描述它現在的生命狀態。',
-                    '如果這抹紅色有溫度，你覺得是多少度？',
-                    '想像這抹紅正試圖對你傳達一個動作，那會是什麼？'
-                ]
-            },
-            { 
-                c: '#f77f00', // 橘色
-                questions: [
-                    '看著這抹橘，描述它在空間裡的重量感。',
-                    '如果這抹橘色是一種氣息，你聞到了什麼？',
-                    '這抹橘色給你的感覺，是正在發生什麼變化？'
-                ]
-            },
-            { 
-                c: '#fcbf49', // 黃色
-                questions: [
-                    '這抹黃色正以什麼樣的方式影響著你的視覺？',
-                    '如果這抹黃色是一個物體的質地，觸摸它會是什麼感覺？',
-                    '這抹黃色在你的世界裡，佔據了什麼樣的角色？'
-                ]
-            },
-            { 
-                c: '#6a994e', // 綠色
-                questions: [
-                    '這抹綠色讓你聯想到了哪一種自然界的聲音？',
-                    '觀察這抹綠，描述它與你之間的距離感。',
-                    '如果這抹綠色是一個天氣，描述你現在身處的環境。'
-                ]
-            },
-            { 
-                c: '#003049', // 藍色
-                questions: [
-                    '這抹深藍色若是一個出口，推開後會看見什麼？',
-                    '描述這抹藍色在空間裡的能量流動方向？',
-                    '盯著這抹藍，你的大腦浮現了哪一個字或畫面？'
-                ]
-            }
+            { c: '#d62828', questions: ['這抹紅若是你身體的一部分，它現在正隱隱作痛，還是充滿跳動的生命力？', '這抹紅色若有重量，你覺得它現在是輕飄飄的，還是沉甸甸地壓著你？', '想像這抹紅正試圖對你傳達一個動作，那會是什麼？'] },
+            { c: '#f77f00', questions: ['看著這抹橘，描述它在空間裡的重量感。', '如果這抹橘色是一種氣味，你聞到了什麼？', '這抹橘色給你的感覺，是正在發生什麼變化？'] },
+            { c: '#fcbf49', questions: ['這抹黃色正以什麼樣的方式影響著你的視覺？', '如果這抹黃色有一個質地，觸摸它會是什麼感覺？', '這抹黃色在你的世界裡，佔據了什麼樣的角色？'] },
+            { c: '#6a994e', questions: ['這抹綠色讓你聯想到了哪一種自然界的聲音？', '觀察這抹綠，描述它與你之間的距離感？', '如果這抹綠色是一個天氣，描述你現在身處的環境。'] },
+            { c: '#003049', questions: ['這抹深藍色若是一個出口，推開後會看見什麼？', '描述這抹藍色在空間裡的能量流動方向？', '盯著這抹藍，你的大腦浮現了哪一個字或畫面？'] }
         ];
 
         const container = document.getElementById('soul-container');
@@ -142,10 +111,8 @@
                 soul.setAttribute('look-at', '[camera]');
 
                 soul.setAttribute('animation', {
-                    property: 'position',
-                    to: `${x} ${y + (Math.random() * 1.0 - 0.5)} ${z}`,
-                    dur: 4000 + Math.random() * 3000,
-                    dir: 'alternate', loop: true, easing: 'easeInOutSine'
+                    property: 'position', to: `${x} ${y + (Math.random() * 1.0 - 0.5)} ${z}`,
+                    dur: 4000 + Math.random() * 3000, dir: 'alternate', loop: true, easing: 'easeInOutSine'
                 });
 
                 soul.addEventListener('mousedown', () => {
@@ -157,14 +124,14 @@
                     userInput.value = ""; 
                     userInput.focus();
                 });
-
                 container.appendChild(soul);
             }
         }
 
         function handleChat() {
             const text = userInput.value.trim();
-            
+            clickCount++; 
+
             const responses = [
                 "聽見了。你的這份覺察已經融入色彩，成為空間的一部分。",
                 "這份感受已經被記錄在色塊的流動中，安靜地存在著。",
@@ -195,17 +162,21 @@
                 setTimeout(() => { if(currentSoul.parentNode) currentSoul.parentNode.removeChild(currentSoul); }, 3500);
             }
 
-            // --- 劇情銜接轉場：在對話框關閉前，顯示引導文字 ---
-            setTimeout(() => {
-                qText.style.color = "#d62828"; // 稍微改變顏色提醒讀者
-                qText.innerText = "當你開始定義色彩，畫作的邊界便消失了... \n李仲生緩緩向你走來，說道：";
-            }, 2500);
-
-            // 總共 5.5 秒後關閉對話框，預留時間給讀者看轉場文字
-            setTimeout(() => { 
-                dialog.style.display = 'none'; 
-                qText.style.color = "#333"; // 還原顏色
-            }, 5500);
+            // 判斷是否為第 3 次互動（劇情銜接）
+            if (clickCount >= MAX_CLICKS) {
+                setTimeout(() => {
+                    qText.style.color = "#d62828"; 
+                    qText.innerText = "當你開始定義色彩，畫作的邊界便消失了... \n李仲生緩緩向你走來，說道：";
+                }, 2000);
+                setTimeout(() => { 
+                    dialog.style.display = 'none'; 
+                    qText.style.color = "#333";
+                    clickCount = 0; // 重置計數，若想讓使用者可以循環玩
+                }, 6500); 
+            } else {
+                // 平時（第 1, 2 次）回答完，3.5 秒後關閉
+                setTimeout(() => { dialog.style.display = 'none'; }, 3500);
+            }
         }
     </script>
 </body>
