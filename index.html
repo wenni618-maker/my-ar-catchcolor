@@ -1,4 +1,139 @@
-function handleChat() {
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>靈魂色塊：李仲生的彩色世界</title>
+    <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
+    <script src="https://unpkg.com/aframe-look-at-component@0.8.0/dist/aframe-look-at-component.min.js"></script>
+    <style>
+        body { margin: 0; overflow: hidden; background-color: #d9d1b3; } 
+        #interface { 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            pointer-events: none; z-index: 10; font-family: 'PingFang TC', 'STHeiti', sans-serif; 
+        }
+        
+        #dialog-box { 
+            position: absolute; bottom: 50px; left: 50%; transform: translateX(-50%); 
+            width: 85%; max-width: 450px; background: rgba(255, 255, 255, 0.95); 
+            padding: 25px; border-radius: 25px; text-align: center; display: none; 
+            pointer-events: auto; box-shadow: 0 15px 35px rgba(0,0,0,0.15); 
+            transition: all 0.5s ease;
+        }
+
+        #input-area { display: none; margin-top: 15px; }
+        
+        #user-input {
+            width: 85%; padding: 12px; border-radius: 20px; border: 1px solid #ccc;
+            outline: none; font-size: 16px; margin-bottom: 10px; background: #fdfdfd;
+        }
+
+        .btn { 
+            background: #4a4a4a; color: #fff; border: none; padding: 10px 30px; 
+            border-radius: 30px; cursor: pointer; font-weight: bold; font-size: 14px;
+        }
+        
+        #question-text { line-height: 1.7; color: #333; font-size: 18px; margin-bottom: 10px; font-weight: 500; white-space: pre-line; }
+        #hint-text {
+            position: absolute; top: 30px; width: 100%; text-align: center;
+            color: rgba(0,0,0,0.4); letter-spacing: 3px; font-size: 14px;
+            transition: opacity 1s ease;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="interface">
+        <div id="hint-text">在李仲生的彩色世界裡，觸碰那些跳動的靈魂，說說你的感受...</div>
+        <div id="dialog-box">
+            <p id="question-text"></p>
+            <div id="input-area">
+                <input type="text" id="user-input" placeholder="寫下你的觀察..." autocomplete="off">
+                <br>
+                <button class="btn" onclick="handleChat()">傾訴完畢</button>
+            </div>
+        </div>
+    </div>
+
+    <a-scene cursor="rayOrigin: mouse" raycaster="objects: .color-soul" renderer="sortObjects: true; alpha: true;" vr-mode-ui="enabled: false">
+        <a-assets>
+            <img id="paper-bg" src="IMG_3120.jpg">
+            <img id="splash-texture" src="IMG_3095.png">
+        </a-assets>
+
+        <a-sky src="#paper-bg" rotation="0 -90 0"></a-sky>
+        <a-entity camera look-controls position="0 1.6 0"></a-entity>
+        <a-entity id="soul-container"></a-entity>
+    </a-scene>
+
+    <script>
+        let clickCount = 0;
+        let isFinalStage = false; 
+        const MAX_CLICKS = 3; 
+        
+        const colorsData = [
+            { c: '#d62828', questions: ['這抹紅若是你身體的一部分，它現在正隱隱作痛，還是充滿跳動的生命力？', '這抹紅色若有重量，你覺得它現在是輕飄飄的，還是沉甸甸地壓著你？', '想像這抹紅正試圖對你傳達一個動作，那會是什麼？'] },
+            { c: '#f77f00', questions: ['看著這抹橘，描述它在空間裡的重量感。', '如果這抹橘色是一種氣味，你聞到了什麼？', '這抹橘色給你的感覺，是正在發生什麼變化？'] },
+            { c: '#fcbf49', questions: ['這抹黃色正以什麼樣的方式影響著你的視覺？', '如果這抹黃色有一個質地，觸摸它會是什麼感覺？', '這抹黃色在你的世界裡，佔據了什麼樣的角色？'] },
+            { c: '#6a994e', questions: ['這抹綠色讓你聯想到了哪一種自然界的聲音？', '觀察這抹綠，描述它與你之間的距離感？', '如果這抹綠色是一個天氣，描述你現在身處的環境。'] },
+            { c: '#003049', questions: ['這抹深藍色若是一個出口，推開後會看見什麼？', '描述這抹藍色在空間裡的能量流動方向？', '盯著這抹藍，你的大腦浮現了哪一個字或畫面？'] }
+        ];
+
+        const container = document.getElementById('soul-container');
+        const sceneEl = document.querySelector('a-scene');
+        const dialog = document.getElementById('dialog-box');
+        const inputArea = document.getElementById('input-area');
+        const userInput = document.getElementById('user-input');
+        const qText = document.getElementById('question-text');
+        const hintText = document.getElementById('hint-text');
+        let currentSoul = null;
+
+        if (sceneEl.hasLoaded) { spawnSouls(); } 
+        else { sceneEl.addEventListener('loaded', spawnSouls); }
+
+        function spawnSouls() {
+            for (let i = 0; i < 80; i++) {
+                const data = colorsData[i % colorsData.length];
+                const soul = document.createElement('a-image');
+                const radius = 2.5 + Math.random() * 3.0; 
+                const angle = Math.random() * Math.PI * 2;
+                const x = Math.sin(angle) * radius;
+                const z = -Math.cos(angle) * radius;
+                const y = 0.8 + Math.random() * 2.2;
+
+                soul.setAttribute('position', {x, y, z});
+                soul.setAttribute('src', '#splash-texture');
+                soul.setAttribute('class', 'color-soul');
+                soul.setAttribute('material', {
+                    color: data.c, transparent: true, opacity: 0.9,
+                    shader: 'flat', depthWrite: false, side: 'double'
+                });
+
+                const s = Math.random() * 0.3 + 0.35; 
+                soul.setAttribute('scale', {x: s, y: s, z: s});
+                soul.setAttribute('look-at', '[camera]');
+
+                soul.setAttribute('animation', {
+                    property: 'position', to: `${x} ${y + (Math.random() * 1.0 - 0.5)} ${z}`,
+                    dur: 4000 + Math.random() * 3000, dir: 'alternate', loop: true, easing: 'easeInOutSine'
+                });
+
+                soul.addEventListener('mousedown', () => {
+                    if (isFinalStage) return; 
+
+                    currentSoul = soul;
+                    dialog.style.display = 'block';
+                    inputArea.style.display = 'block';
+                    const randomQ = data.questions[Math.floor(Math.random() * data.questions.length)];
+                    qText.innerText = randomQ;
+                    userInput.value = ""; 
+                    userInput.focus();
+                });
+                container.appendChild(soul);
+            }
+        }
+
+        function handleChat() {
             const text = userInput.value.trim();
             clickCount++; 
 
@@ -11,7 +146,6 @@ function handleChat() {
                 "聽見了。你的直覺非常獨特，它豐富了這片色彩的生命力。"
             ];
 
-            // 1. 先處理當下的回覆文字
             if (text === "") {
                 qText.innerText = "沒關係，沈默有時也是一種最有力的傾訴。";
             } else {
@@ -19,10 +153,8 @@ function handleChat() {
                 qText.innerText = responses[randomIndex];
             }
 
-            // 2. 隱藏輸入區
             inputArea.style.display = 'none';
 
-            // 3. 處理色塊飛散動畫
             if (currentSoul) {
                 const pos = currentSoul.getAttribute('position');
                 currentSoul.setAttribute('animation__fadeout', {
@@ -35,21 +167,23 @@ function handleChat() {
                 setTimeout(() => { if(currentSoul.parentNode) currentSoul.parentNode.removeChild(currentSoul); }, 3500);
             }
 
-            // 4. 關鍵判斷：如果是第三次（或以上）
+            // 判斷是否為第三次點擊
             if (clickCount >= MAX_CLICKS) {
-                isEnded = true; 
-                // 兩秒後換成最終感性的台詞，且不執行隱藏指令
+                isFinalStage = true; // 進入終章狀態，對話框將不再消失
                 setTimeout(() => {
                     if (hintText) hintText.style.opacity = '0'; 
                     qText.style.color = "#d62828"; 
                     qText.innerText = "色彩的喧嘩逐漸遠去\n留下的，是你與這片世界共鳴的頻率。";
                 }, 2000);
-                
-                // 這裡絕對不寫隱藏對話框的代碼
             } else {
-                // 只有前兩次會自動消失
+                // 只有前兩次會自動隱藏對話框
                 setTimeout(() => { 
-                    if (!isEnded) dialog.style.display = 'none'; 
+                    if (!isFinalStage) {
+                        dialog.style.display = 'none'; 
+                    }
                 }, 3500);
             }
         }
+    </script>
+</body>
+</html>
