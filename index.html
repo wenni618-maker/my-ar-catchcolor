@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>靈魂色塊：深層對話空間</title>
+    <title>靈魂色塊：李仲生的彩色世界</title>
     <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
     <script src="https://unpkg.com/aframe-look-at-component@0.8.0/dist/aframe-look-at-component.min.js"></script>
     <style>
@@ -42,11 +42,11 @@
 <body>
 
     <div id="interface">
-        <div id="hint-text">當你觸碰畫面，試著抓住了一抹色彩後...</div>
+        <div id="hint-text">在李仲生的彩色世界裡，觸碰那些跳動的靈魂...</div>
         <div id="dialog-box">
             <p id="question-text"></p>
             <div id="input-area">
-                <input type="text" id="user-input" placeholder="試著描述那種感覺..." autocomplete="off">
+                <input type="text" id="user-input" placeholder="寫下你的觀察..." autocomplete="off">
                 <br>
                 <button class="btn" onclick="handleChat()">傾訴完畢</button>
             </div>
@@ -65,43 +65,35 @@
     </a-scene>
 
     <script>
-        // --- 深度引導題庫 ---
         const colorsData = [
             { 
                 c: '#d62828', // 紅色
                 questions: [
-                    '這抹紅若是你身體的一部分，它現在正隱隱作痛，還是充滿跳動的生命力？', 
-                    '這抹紅色若有重量，你覺得它現在是輕飄飄的，還是沉甸甸地壓著你？',
-                    '想像這抹紅色正在你體內流動，它停留在了哪個部位？那裡是什麼感覺？',
-                    '盯著這抹紅，描述它帶給你的第一種感覺。',
-                    '如果這抹紅色有溫度，你現在感覺它大約是多少度？',
-                    '這抹紅色若是一個動作，它現在正在對你做什麼？'
+                    '盯著這抹紅，描述它現在的生命狀態。',
+                    '如果這抹紅色有溫度，你覺得是多少度？',
+                    '想像這抹紅正試圖對你傳達一個動作，那會是什麼？'
                 ]
             },
             { 
                 c: '#f77f00', // 橘色
                 questions: [
-                    '這抹顏色像不像夕陽最後的餘暉？它讓你感到一種放下的輕鬆，還是一種消逝的落幕？',
-                    '如果橘色是一種聲音，它聽起來會是甚麼樣的世界呢？',
-                    '如果橘色是一種氣味，它聞起來是清新的，還是讓你感到有些悶熱？用一句話來形容吧!',
-                    '你覺得這抹橘色現在最想對你表達什麼？'
+                    '看著這抹橘，描述它在空間裡的重量感。',
+                    '如果這抹橘色是一種氣息，你聞到了什麼？',
+                    '這抹橘色給你的感覺，是正在發生什麼變化？'
                 ]
             },
             { 
                 c: '#fcbf49', // 黃色
                 questions: [
-                    '這抹黃色正在對你的視線產生什麼樣的影響？',
-                    '如果這抹黃色有重量，你覺得它在你的手掌心是什麼感覺？',
-                    '想像你可以走進這抹黃色，那是一個什麼樣的空間？',
+                    '這抹黃色正以什麼樣的方式影響著你的視覺？',
+                    '如果這抹黃色是一個物體的質地，觸摸它會是什麼感覺？',
                     '這抹黃色在你的世界裡，佔據了什麼樣的角色？'
                 ]
             },
             { 
                 c: '#6a994e', // 綠色
                 questions: [
-                    '這抹綠色讓你聯想到了什麼樣的質地或觸感？',
-                    '看著這抹綠，觀察你的呼吸產生了什麼樣的變化？',
-                    '這抹綠色若是一個天氣，你現在正處於什麼樣的環境中？',
+                    '這抹綠色讓你聯想到了哪一種自然界的聲音？',
                     '觀察這抹綠，描述它與你之間的距離感。',
                     '如果這抹綠色是一個天氣，描述你現在身處的環境。'
                 ]
@@ -109,10 +101,8 @@
             { 
                 c: '#003049', // 藍色
                 questions: [
-                    '這抹深藍若是你情緒的深海，你正悠游其中，這時你的內心有什麼感受嗎?',
-                    '藍色有時候代表憂鬱。那麼對你而言呢?這個顏色是甚麼樣的存在?',
-                    '這抹深藍色讓你感覺自己現在正處於什麼樣的位置？',
-                    '如果這抹藍色是一種明暗變化，它現在正在發生什麼？',
+                    '這抹深藍色若是一個出口，推開後會看見什麼？',
+                    '描述這抹藍色在空間裡的能量流動方向？',
                     '盯著這抹藍，你的大腦浮現了哪一個字或畫面？'
                 ]
             }
@@ -175,7 +165,6 @@
         function handleChat() {
             const text = userInput.value.trim();
             
-            // --- 隨機多樣化回應庫 ---
             const responses = [
                 "聽見了。你的這份覺察已經融入色彩，成為空間的一部分。",
                 "這份感受已經被記錄在色塊的流動中，安靜地存在著。",
@@ -188,12 +177,10 @@
             if (text === "") {
                 qText.innerText = "沒關係，沈默有時也是一種最有力的傾訴。";
             } else {
-                // 隨機挑選一個回應
                 const randomIndex = Math.floor(Math.random() * responses.length);
                 qText.innerText = responses[randomIndex];
             }
 
-            // --- 隱藏輸入區並執行色塊升起消失動畫 ---
             inputArea.style.display = 'none';
 
             if (currentSoul) {
@@ -208,8 +195,17 @@
                 setTimeout(() => { if(currentSoul.parentNode) currentSoul.parentNode.removeChild(currentSoul); }, 3500);
             }
 
-            // 4秒後自動關閉對話框
-            setTimeout(() => { document.getElementById('dialog-box').style.display = 'none'; }, 4000);
+            // --- 劇情銜接轉場：在對話框關閉前，顯示引導文字 ---
+            setTimeout(() => {
+                qText.style.color = "#d62828"; // 稍微改變顏色提醒讀者
+                qText.innerText = "當你開始定義色彩，畫作的邊界便消失了... \n李仲生緩緩向你走來，說道：";
+            }, 2500);
+
+            // 總共 5.5 秒後關閉對話框，預留時間給讀者看轉場文字
+            setTimeout(() => { 
+                dialog.style.display = 'none'; 
+                qText.style.color = "#333"; // 還原顏色
+            }, 5500);
         }
     </script>
 </body>
