@@ -42,7 +42,7 @@
 <body>
 
     <div id="interface">
-        <div id="hint-text">在李仲生的彩色世界裡，觸碰那些跳動的靈魂...</div>
+        <div id="hint-text">在李仲生的彩色世界裡，觸碰那些跳動的靈魂，說說你的感受....</div>
         <div id="dialog-box">
             <p id="question-text"></p>
             <div id="input-area">
@@ -67,7 +67,7 @@
     <script>
         // --- 設定區 ---
         let clickCount = 0;
-        const MAX_CLICKS = 3; // 設定回答 3 次後觸發劇情銜接
+        const MAX_CLICKS = 3; // 回答 3 次後觸發結束劇情
         
         const colorsData = [
             { c: '#d62828', questions: ['這抹紅若是你身體的一部分，它現在正隱隱作痛，還是充滿跳動的生命力？', '這抹紅色若有重量，你覺得它現在是輕飄飄的，還是沉甸甸地壓著你？', '想像這抹紅正試圖對你傳達一個動作，那會是什麼？'] },
@@ -116,6 +116,9 @@
                 });
 
                 soul.addEventListener('mousedown', () => {
+                    // 若已達到最大次數，則鎖定互動，不彈出新問題
+                    if (clickCount >= MAX_CLICKS) return;
+
                     currentSoul = soul;
                     dialog.style.display = 'block';
                     inputArea.style.display = 'block';
@@ -162,19 +165,15 @@
                 setTimeout(() => { if(currentSoul.parentNode) currentSoul.parentNode.removeChild(currentSoul); }, 3500);
             }
 
-            // 判斷是否為第 3 次互動（劇情銜接）
+            // 判斷是否為第 3 次互動（結局）
             if (clickCount >= MAX_CLICKS) {
                 setTimeout(() => {
                     qText.style.color = "#d62828"; 
                     qText.innerText = "當你開始定義色彩，畫作的邊界便消失了... \n李仲生緩緩向你走來，說道：";
+                    // 關鍵修正：這裡不再設定 setTimeout 來隱藏對話框，讓它固定顯示
                 }, 2000);
-                setTimeout(() => { 
-                    dialog.style.display = 'none'; 
-                    qText.style.color = "#333";
-                    clickCount = 0; // 重置計數，若想讓使用者可以循環玩
-                }, 6500); 
             } else {
-                // 平時（第 1, 2 次）回答完，3.5 秒後關閉
+                // 平時回答完，3.5 秒後關閉
                 setTimeout(() => { dialog.style.display = 'none'; }, 3500);
             }
         }
