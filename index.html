@@ -18,6 +18,7 @@
             width: 85%; max-width: 450px; background: rgba(255, 255, 255, 0.95); 
             padding: 25px; border-radius: 25px; text-align: center; display: none; 
             pointer-events: auto; box-shadow: 0 15px 35px rgba(0,0,0,0.15); 
+            transition: all 0.5s ease;
         }
 
         #input-area { display: none; margin-top: 15px; }
@@ -32,10 +33,11 @@
             border-radius: 30px; cursor: pointer; font-weight: bold; font-size: 14px;
         }
         
-        #question-text { line-height: 1.7; color: #333; font-size: 18px; margin-bottom: 10px; font-weight: 500; }
+        #question-text { line-height: 1.7; color: #333; font-size: 18px; margin-bottom: 10px; font-weight: 500; white-space: pre-line; }
         #hint-text {
             position: absolute; top: 30px; width: 100%; text-align: center;
             color: rgba(0,0,0,0.4); letter-spacing: 3px; font-size: 14px;
+            transition: opacity 1s ease;
         }
     </style>
 </head>
@@ -67,7 +69,8 @@
     <script>
         // --- 設定區 ---
         let clickCount = 0;
-        const MAX_CLICKS = 3; // 設定回答 3 次後觸發劇情銜接
+        let isEnded = false; // 用於標記是否已進入最終劇情
+        const MAX_CLICKS = 3; 
         
         const colorsData = [
             { c: '#d62828', questions: ['這抹紅若是你身體的一部分，它現在正隱隱作痛，還是充滿跳動的生命力？', '這抹紅色若有重量，你覺得它現在是輕飄飄的，還是沉甸甸地壓著你？', '想像這抹紅正試圖對你傳達一個動作，那會是什麼？'] },
@@ -83,6 +86,7 @@
         const inputArea = document.getElementById('input-area');
         const userInput = document.getElementById('user-input');
         const qText = document.getElementById('question-text');
+        const hintText = document.getElementById('hint-text');
         let currentSoul = null;
 
         if (sceneEl.hasLoaded) { spawnSouls(); } 
@@ -116,6 +120,8 @@
                 });
 
                 soul.addEventListener('mousedown', () => {
+                    if (isEnded) return; // 如果結束了，就不再開啟新問題
+
                     currentSoul = soul;
                     dialog.style.display = 'block';
                     inputArea.style.display = 'block';
@@ -162,19 +168,17 @@
                 setTimeout(() => { if(currentSoul.parentNode) currentSoul.parentNode.removeChild(currentSoul); }, 3500);
             }
 
-            // 判斷是否為第 3 次互動（劇情銜接）
+            // 判斷是否觸發最終劇情
             if (clickCount >= MAX_CLICKS) {
+                isEnded = true; 
                 setTimeout(() => {
+                    hintText.style.opacity = '0'; // 隱藏頂部提示
                     qText.style.color = "#d62828"; 
                     qText.innerText = "色彩的喧嘩逐漸遠去\n留下的，是你與這片世界共鳴的頻率。";
+                    // 這裡不寫隱藏 dialog 的代碼，它會永遠停留在這
                 }, 2000);
-                setTimeout(() => { 
-                    dialog.style.display = 'none'; 
-                    qText.style.color = "#333";
-                    clickCount = 0; // 重置計數，若想讓使用者可以循環玩
-                }, 6500); 
             } else {
-                // 平時（第 1, 2 次）回答完，3.5 秒後關閉
+                // 前兩次點擊，3.5 秒後關閉
                 setTimeout(() => { dialog.style.display = 'none'; }, 3500);
             }
         }
